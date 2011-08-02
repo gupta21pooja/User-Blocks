@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Content:</b>
+  <%= @block.content %>
+</p>
+
+<p>
+  <b>Is private:</b>
+  <%= @block.is_private %>
+</p>
+<p>
+  <b>Language Type:</b>
+  <%= @block.language.name %>
+</p>
+<h3> Versions</h3>
+<p>
+  <% @block.revisions.each do |block| %>
+     <td><%= link_to block.version, block_path(block,:version => block.version) %></td>
+  <% end %>
+</p>
+
+
+<%= link_to 'Edit', edit_block_path(@block) %> |
+<%= link_to 'Back', blocks_path %>

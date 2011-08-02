@@ -1,0 +1,26 @@
+<h1>Listing blocks</h1>
+
+<table>
+  <tr>
+    <th>Content</th>
+    <th>Is private</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @blocks.each do |block| %>
+  <tr>
+    <td><%= block.content %></td>
+    <td><%= block.is_private %></td>
+    <td><%= link_to 'Show', block %></td>
+    <td><%= link_to 'Edit', edit_block_path(block) if is_self_block(block) %></td>
+    <td><%= link_to 'Destroy', block, :confirm => 'Are you sure?', :method => :delete if is_self_block(block)%></td>
+    </tr>
+<% end %>
+  <%= paginate  @blocks %>
+</table>
+
+<br />
+
+<%= link_to 'New Block', new_block_path %>
