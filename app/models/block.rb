@@ -12,4 +12,8 @@ class Block
     self.versions 
   end
   
+  def is_owner?(current_session)
+    self.session == current_session
+  end
+  
 end

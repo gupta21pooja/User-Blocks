@@ -1,6 +1,9 @@
 class BlocksController < ApplicationController
   # GET /blocks
   # GET /blocks.xml
+  before_filter :authenticate
+  before_filter :load_block , :except => [:index]
+  before_filter :has_premission?, :only => [:destroy,:edit]
 
   def index
     @blocks = Block.public_blocks.page(params[:page]).per(1)
@@ -13,13 +16,7 @@ class BlocksController < ApplicationController
   # GET /blocks/1
   # GET /blocks/1.xml
   def show
-#    if params[:version]
-#      @block = Block.where(:version => params[:version])
-#      p @block.last
-#    else
-      @block = Block.find(params[:id])
-#    end
-
+    @block = Block.find(params[:id])
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @block }
@@ -46,7 +43,7 @@ class BlocksController < ApplicationController
   # POST /blocks.xml
   def create
     @block = Block.new(params[:block])
-    @block.user_session = set_user_session
+    @block.user_session = user_session
     respond_to do |format|
       if @block.save
         format.html { redirect_to(@block, :notice => 'Block was successfully created.') }
@@ -62,7 +59,6 @@ class BlocksController < ApplicationController
   # PUT /blocks/1.xml
   def update
     @block = Block.find(params[:id])
-
     respond_to do |format|
       if @block.update_attributes(params[:block])
         format.html { redirect_to(@block, :notice => 'Block was successfully updated.') }
@@ -78,11 +74,41 @@ class BlocksController < ApplicationController
   # DELETE /blocks/1.xml
   def destroy
     @block = Block.find(params[:id])
-    @block.destroy
-
-    respond_to do |format|
-      format.html { redirect_to(blocks_url) }
-      format.xml  { head :ok }
+    if @user_session == @block.user_session
+      respond_to do |format|
+        format.html { redirect_to(blocks_url) }
+        format.xml  { head :ok }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to(blocks_url) }
+        format.xml  { render :xml => "you cann't delete", :status => :unprocessable_entity }
+      end
     end
   end
+  protected
+
+  def authenticate
+    if params[:session_id]
+      session[:session_id] = params[:session_id]
+      @user_session = UserSession.find_or_create_by(:session_id => session[:session_id])
+    else
+      
+    end    
+  end
+  
+  def has_premission?
+    unless @user_session && !@block.is_owner?(@user_session)
+      redirect_to :back and return true
+    end
+  end
+  
+  def load_block
+    if params[:id]
+      @block  = Block.find(params[:id])
+    else
+      @block = Block.new(params[:block])
+    end
+  end  
+
 end
